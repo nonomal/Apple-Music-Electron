@@ -16,15 +16,24 @@ function CreateWindow() {
     if (app.isQuiting) { app.quit(); return; }
 
     app.win = app.ame.win.CreateBrowserWindow() // Create the BrowserWindow
-
+    app.splash = require("./resources/functions/splash").CreateWindow()
     app.ame.handler.WindowStateHandler(); // Handling the Window
+    app.ame.handler.RendererListenerHandlers(); // Renderer Listeners
+    app.ame.handler.SettingsHandler(); // Handles updates to settings
     app.ame.handler.PlaybackStateHandler(); // Playback Change Listener
     app.ame.handler.MediaStateHandler(); // Media Change Listener
     app.ame.handler.LyricsHandler(); // Lyrics Handling
-    app.ame.handler.RendererListenerHandlers(); // Renderer Listeners
-    app.ame.handler.SettingsHandler(); // Handles updates to settings
+    app.ame.handler.AudioHandler(); // Exclusive Audio Stuff
+    app.ame.handler.GoogleCastHandler(); // Chromecast
 
-    if (process.platform === 'win32' && app.transparency) { app.win.show() } // Show the window so SetThumbarButtons doesnt break
+
+    if(process.platform === "win32") {
+        app.win.show()
+    }
+
+    if (process.platform === 'win32') {
+        app.updater = require("./resources/functions/updater_win32")
+    } // Show the window so SetThumbarButtons doesnt break
     app.ame.win.SetButtons() // Set Inactive Thumbnail Toolbar Icons or TouchBar
     app.ame.win.SetApplicationMenu()
     app.ame.win.SetTaskList()
@@ -43,6 +52,11 @@ app.on('ready', () => {
 
     // Apple Header tomfoolery.
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+        if(details.url.match(/^https:\/\/store-\d{3}\.blobstore\.apple\.com/) || details.url.startsWith("https://store-037.blobstore.apple.com")){
+        details.responseHeaders['Access-Control-Allow-Origin'] = '*';}
+         if(details.url.includes('encoderWorker.umd.js')){
+            details.responseHeaders['Content-Type'] = `text/javascript`;
+         }
         details.responseHeaders['Content-Security-Policy'] = 'unsafe-inline'
         callback({ responseHeaders: details.responseHeaders })
     })
@@ -59,7 +73,7 @@ app.on('activate', () => {
     if (app.win === null) {
         CreateWindow()
     } else {
-        app.win.show()
+        // app.win.show()
     }
 })
 

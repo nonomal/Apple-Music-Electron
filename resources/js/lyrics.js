@@ -15,13 +15,16 @@
         self.currentLine = 0;
 
         const container = document.getElementById(self.divID);
+        if(!container) {
+            return;
+        }
         container.innerHTML = "";
         const ul = document.createElement("ul");
         container.appendChild(ul);
         for (i = 0; i < self.totalLines; i++) {
             const li = document.createElement("li");
             if (self.rangeLrc[i].line === 'lrcInstrumental'){
-                li.innerHTML = `<div class="lyricWaiting"><div></div><div></div><div></div></div>`;
+                li.innerHTML = `<div class="lyricWaiting"><div class="WaitingDot1"></div><div class="WaitingDot2"></div><div class="WaitingDot3"></div></div>`;
             } else {
             li.innerHTML = self.rangeLrc[i].line;
             if (!li.innerHTML) {
@@ -54,9 +57,37 @@
             }
             if (i === line) {
                 li.classList.add(self.currentcss);
-                li.scrollIntoView({behavior: 'smooth', block: 'center'});
+                if(this.focus == 'start'){
+                 li.scrollIntoView({behavior: 'smooth', block: 'start'});    
+                }else{
+                li.scrollIntoView({behavior: 'smooth', block: 'center'})};
+                try{
+                if (li.innerText == '&nbsp;'){
+                    document.querySelector(`#MVLyricsBox`).style.display = 'none';
+                } else if (MusicKit.getInstance().nowPlayingItem["type"] === "musicVideo"){
+                    document.querySelector(`#MVLyricsBox`).style.display = 'block';
+                }
+                var u  = '';
+                if (li.getElementsByClassName('lyrics-translation').length > 0 ){
+                try{ 
+                    if(!li.innerText.includes('Instrumental. / Lyrics not found.')){ 
+                    u  = li.getElementsByClassName('lyrics-translation')[0].innerText;    
+                    document.querySelector(`#MVLyricsBox`).childNodes[1].innerHTML= li.getElementsByClassName('lyrics-translation')[0].innerText;
+                    document.querySelector(`#MVLyricsBox`).childNodes[0].innerHTML= (li.innerText).replace(u,'');}
+                } catch(e){}
+                } else {
+                    if(!li.innerText.includes('Instrumental. / Lyrics not found.')){
+                    document.querySelector(`#MVLyricsBox`).childNodes[0].innerHTML= li.innerText;  
+                    document.querySelector(`#MVLyricsBox`).childNodes[1].innerHTML= ''; }
+                }
+
+                
+               
+                } catch(e){console.log('mverr',e);}
             } else {
+                try{
                 li.classList.remove(self.currentcss);
+                } catch(e){}
             }
         }
     };
@@ -68,6 +99,7 @@
         this.showLines = 8; /*lines showing before and after;*/
         this.clickable = true;
         this.clickEventName = "lyricerclick";
+        this.focus = 'center';
         if (options) {
             for (const prop in options) {
                 if (typeof this[prop] != "undefined" && options.hasOwnProperty(prop)) {
@@ -75,6 +107,9 @@
                 }
             }
         }
+    };
+    Lyricer.prototype.setFocus = function(focus2){
+        this.focus = focus2;
     };
 
     Lyricer.prototype.setLrc = function (rawLrc) {
@@ -139,6 +174,9 @@
         /* set html and move to start*/
         setHtml(this);
         this.move(0);
+        if(typeof _lyrics !== "undefined") {
+            _lyrics.setLyrics(this.rangeLrc);
+        }
     };
 
     Lyricer.prototype.move = function (time) {
@@ -148,6 +186,75 @@
                     this.currentLine = i;
                     moveToLine(this, this.currentLine);
                 }
+
+                if (this.rangeLrc[i].line == "lrcInstrumental"){
+                   var duration = this.rangeLrc[i].endTime - this.rangeLrc[i].startTime;
+                   var u = ( time - this.rangeLrc[i].startTime ) / duration;                  
+                   if (u < 0.25 && !document.querySelector(`#lyricer .lyricer-current-line`).classList.contains('mode1')){
+                    console.log('mode1');
+                        try{
+                        document.querySelector(`#lyricer .lyricer-current-line`).classList.add('mode1');    
+                        document.querySelector(`#lyricer .lyricer-current-line`).classList.remove('mode3');
+                        document.querySelector(`#lyricer .lyricer-current-line`).classList.remove('mode2');
+                        } catch(e){}
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot1')[0].style.animation = `dotOpacity ${0.25 * duration}s cubic-bezier(0.42, 0, 0.58, 1) forwards`;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot2')[0].style.animation = ``;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot3')[0].style.animation = ``;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot2')[0].style.opacity = 0.25;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot3')[0].style.opacity = 0.25; 
+                    /*  document.getElementsByClassName('WaitingDot1')[0].style.opacity = 0.25 + (((u) /0.25) * 0.75);
+                        document.getElementsByClassName('WaitingDot2')[0].style.opacity = 0.25;
+                        document.getElementsByClassName('WaitingDot3')[0].style.opacity = 0.25; */
+
+                    } else if (u >= 0.25 && u < 0.5 && !document.querySelector(`#lyricer .lyricer-current-line`).classList.contains('mode2')){
+                        console.log('mode2');
+                        try{
+                            document.querySelector(`#lyricer .lyricer-current-line`).classList.add('mode2');    
+                        document.querySelector(`#lyricer .lyricer-current-line`).classList.remove('mode1');
+                        document.querySelector(`#lyricer .lyricer-current-line`).classList.remove('mode3');
+                        }
+                        catch(e){}
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot2')[0].style.animation = `dotOpacity ${0.25 * duration}s cubic-bezier(0.42, 0, 0.58, 1) forwards`;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot1')[0].style.animation = ``;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot3')[0].style.animation = ``;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot1')[0].style.opacity = 1;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot3')[0].style.opacity = 0.25;
+                      /*  document.getElementsByClassName('WaitingDot1')[0].style.opacity = 1;
+                        document.getElementsByClassName('WaitingDot2')[0].style.opacity = 0.25  +  (((u-0.25) /0.25) * 0.75);
+                        document.getElementsByClassName('WaitingDot3')[0].style.opacity = 0.25; */
+                   } else if (u >= 0.5 && u < 0.75 && !document.querySelector(`#lyricer .lyricer-current-line`).classList.contains('mode3')){
+                   console.log('mode3');
+                        try{
+                        document.querySelector(`#lyricer .lyricer-current-line`).classList.add('mode3');
+                        document.querySelector(`#lyricer .lyricer-current-line`).classList.remove('mode1');
+                        document.querySelector(`#lyricer .lyricer-current-line`).classList.remove('mode2');
+                        } catch(e){}
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot3')[0].style.animation = `dotOpacity ${0.25 * duration}s cubic-bezier(0.42, 0, 0.58, 1) forwards`;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot1')[0].style.animation = ``;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot2')[0].style.animation = ``;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot1')[0].style.opacity = 1;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot2')[0].style.opacity = 1;
+                     /*   document.getElementsByClassName('WaitingDot1')[0].style.opacity = 1;
+                        document.getElementsByClassName('WaitingDot2')[0].style.opacity = 1;
+                        document.getElementsByClassName('WaitingDot3')[0].style.opacity = 0.25  +  (((u-0.5) /0.25) * 0.75); */
+                   } else if (u >= 0.75 && document.querySelector(`#lyricer .lyricer-current-line`).classList.contains('mode3')){
+                       console.log('mode4');
+                       try{
+                        document.querySelector(`#lyricer .lyricer-current-line`).classList.remove('mode1');
+                        document.querySelector(`#lyricer .lyricer-current-line`).classList.remove('mode2');
+                        document.querySelector(`#lyricer .lyricer-current-line`).classList.remove('mode3');}
+                        catch(e){}
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot1')[0].style.animation = ``;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot2')[0].style.animation = ``;
+
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot1')[0].style.opacity = 1;
+                        document.querySelector(`#lyricer .lyricer-current-line`).getElementsByClassName('WaitingDot2')[0].style.opacity = 1;
+                         
+                   }
+
+                }
+                
+                
                 return;
             }
         }

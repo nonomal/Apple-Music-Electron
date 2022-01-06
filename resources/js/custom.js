@@ -1,5 +1,13 @@
-try {
 
+try {
+    /* Add AM Lyrics Font JP, JR */
+    var headID = document.getElementsByTagName('head')[0];
+    var link = document.createElement('link');
+    link.type = 'text/css';
+    link.rel = 'stylesheet';
+    link.setAttribute('name','fonts');
+    headID.appendChild(link);
+    link.href = "//www.apple.com/wss/fonts?families=SF+Pro,v3|SF+Pro+Icons,v3|SF+Pro+KR,v2|SF+Pro+JP,v1";
     function GetXPath(path) {
         return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
     }
@@ -38,7 +46,6 @@ try {
         var _miniPlayer = {
             active: false,
             init() {
-                let self = this;
                 const webChrome = document.querySelector(".web-chrome");
                 const elements = {
                     artwork: document.createElement("div"),
@@ -80,42 +87,87 @@ try {
         };
     }
 
-
     /* Lyrics Functions */
     if (typeof _lyrics == "undefined") {
         var _lyrics = {
+            current: [],
+            events: [],
+            onchange (fn = ()=>{}) {
+                this.events.push(fn)
+            },
+            setLyrics(lyrics) {
+                this.current = lyrics;
+                this.events.forEach((event)=>{
+                   event(lyrics);
+                });
+            },
             CreateButton: () => {
-                const mediaControlsElement = document.getElementsByClassName('web-chrome-controls-container')[0];
-                /* Lyrics Button */
-                if (!document.querySelector('#lyricsButton') && mediaControlsElement) {
-                    const lyricsButton = document.createElement("div");
-                    lyricsButton.style.height = "22px";
-                    lyricsButton.style.width = "22px";
-                    lyricsButton.style.marginInlineEnd = "0px";
-                    lyricsButton.style.zIndex = "9999";
-                    lyricsButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 0 28 28" id="vector"><path id="path" d="M 14.4 12.2 C 14.4 11.1 15.2 10.3 16.4 10.3 C 17.7 10.3 18.5 11.3 18.5 12.7 C 18.5 14.7 16.8 15.9 15.8 15.9 C 15.5 15.9 15.3 15.7 15.3 15.5 C 15.3 15.3 15.4 15.1 15.7 15.1 C 16.5 14.9 17.1 14.4 17.4 13.7 L 17.2 13.7 C 17 14 16.6 14.1 16.1 14.1 C 15.1 14 14.4 13.2 14.4 12.2 Z M 9.5 12.2 C 9.5 11.1 10.3 10.3 11.5 10.3 C 12.8 10.3 13.6 11.3 13.6 12.7 C 13.6 14.7 11.9 15.9 10.9 15.9 C 10.6 15.9 10.4 15.7 10.4 15.5 C 10.4 15.3 10.5 15.1 10.8 15.1 C 11.6 14.9 12.3 14.4 12.5 13.7 L 12.3 13.7 C 12.1 14 11.7 14.1 11.2 14.1 C 10.2 14 9.5 13.2 9.5 12.2 Z M 10.4 21.4 L 13.2 18.7 C 13.8 18.1 14.1 18 14.8 18 L 19.4 18 C 20.7 18 21.5 17.2 21.5 15.9 L 21.5 9.4 C 21.5 8 20.7 7.3 19.4 7.3 L 8.5 7.3 C 7.2 7.3 6.4 8 6.4 9.4 L 6.4 15.9 C 6.4 17.2 7.2 18 8.5 18 L 9.5 18 C 10.1 18 10.4 18.3 10.4 18.9 L 10.4 21.4 Z M 9.9 24 C 9 24 8.4 23.4 8.4 22.4 L 8.4 20.4 L 7.9 20.4 C 5.4 20.3 4 19 4 16.5 L 4 9 C 4 6.5 5.5 5 8.1 5 L 19.9 5 C 22.5 5 24 6.4 24 9 L 24 16.6 C 24 19.1 22.5 20.4 19.9 20.4 L 14.8 20.4 L 11.7 23.1 C 11 23.7 10.5 24 9.9 24 Z" /></svg>`;
-                    lyricsButton.id = "lyricsButton";
-                    lyricsButton.className = "web-chrome-playback-controls__platter-toggle-buttons web-chrome-playback-controls__meta-btn";
-                    mediaControlsElement.insertBefore(lyricsButton, mediaControlsElement.childNodes[4]);
-                }
 
+                const mediaControlsElement = document.querySelector('.web-chrome-controls-container');
+
+                /* Chromecast / Airplay Button */
+                    if (!document.querySelector('#airplayButton') && mediaControlsElement) {
+                        const buttonDiv = document.createElement("div");
+                        buttonDiv.classList.add('web-chrome-playback-controls__platter-toggle-buttons', 'web-chrome-playback-controls__meta-btn"');
+                        buttonDiv.style.marginInlineEnd = "12px";
+                        buttonDiv.style.width = "auto";
+                        buttonDiv.style.zIndex = "9999";
+                        buttonDiv.innerHTML = `
+                            <button id="airplayButton" aria-haspopup="list" aria-expanded="false" class="button-reset web-chrome-playback-controls__meta-btn web-chrome-playback-controls__up-next-btn" aria-label="airplayButton" data-drop-area="" style="padding: 0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 22" version="1.1" style="width: 100%; height: 100%; fill-rule: evenodd; clip-rule: evenodd; stroke-linejoin: round; stroke-miterlimit: 1.41421">
+                                    <path d="M16.811,12.75c0.245,-0.355 0.389,-0.786 0.389,-1.25c0,-1.215 -0.985,-2.2 -2.2,-2.2c-1.215,0 -2.2,0.985 -2.2,2.2c0,0.466 0.145,0.898 0.392,1.254l-0.83,1.047c-0.537,-0.616 -0.862,-1.42 -0.862,-2.301c0,-1.933 1.567,-3.5 3.5,-3.5c1.933,0 3.5,1.567 3.5,3.5c0,0.879 -0.324,1.683 -0.859,2.297l-0.83,-1.047Zm1.271,1.604c0.694,-0.749 1.118,-1.752 1.118,-2.854c0,-2.32 -1.88,-4.2 -4.2,-4.2c-2.32,0 -4.2,1.88 -4.2,4.2c0,1.103 0.425,2.107 1.121,2.857l-0.814,1.028c-0.993,-0.995 -1.607,-2.368 -1.607,-3.885c0,-3.038 2.462,-5.5 5.5,-5.5c3.038,0 5.5,2.462 5.5,5.5c0,1.515 -0.613,2.887 -1.604,3.882l-0.814,-1.028Zm1.252,1.58c1.151,-1.126 1.866,-2.697 1.866,-4.434c0,-3.424 -2.776,-6.2 -6.2,-6.2c-3.424,0 -6.2,2.776 -6.2,6.2c0,1.739 0.716,3.311 1.869,4.437l-0.811,1.023c-1.452,-1.368 -2.358,-3.308 -2.358,-5.46c0,-4.142 3.358,-7.5 7.5,-7.5c4.142,0 7.5,3.358 7.5,7.5c0,2.15 -0.905,4.089 -2.355,5.457l-0.811,-1.023Zm-0.227,2.066l-8.219,0c-0.355,0 -0.515,-0.434 -0.27,-0.717l4.058,-5.12c0.178,-0.217 0.474,-0.217 0.652,0l4.058,5.12c0.237,0.283 0.085,0.717 -0.279,0.717Z" style="fill-rule:nonzero"/>
+                                </svg>
+                            </button>
+                        `;
+                        mediaControlsElement.insertBefore(buttonDiv, mediaControlsElement.childNodes[4]);
+                }
+                /* Create the Button */
+                if (!document.querySelector('[aria-label="Lyrics"]') && mediaControlsElement) {
+                    const buttonDiv = document.createElement("div");
+                    buttonDiv.classList.add('web-chrome-playback-controls__platter-toggle-buttons', 'web-chrome-playback-controls__meta-btn');
+                    buttonDiv.style.marginInlineEnd = "0";
+                    buttonDiv.style.width = "auto";
+                    buttonDiv.style.zIndex = "9999";
+                    buttonDiv.innerHTML = `
+                        <button id="lyricsButton" aria-haspopup="list" aria-expanded="false" class="button-reset web-chrome-playback-controls__meta-btn web-chrome-playback-controls__up-next-btn" aria-label="Lyrics" data-drop-area="" style="padding: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 28 28">
+                                <path id="path" d="M 14.4 12.2 C 14.4 11.1 15.2 10.3 16.4 10.3 C 17.7 10.3 18.5 11.3 18.5 12.7 C 18.5 14.7 16.8 15.9 15.8 15.9 C 15.5 15.9 15.3 15.7 15.3 15.5 C 15.3 15.3 15.4 15.1 15.7 15.1 C 16.5 14.9 17.1 14.4 17.4 13.7 L 17.2 13.7 C 17 14 16.6 14.1 16.1 14.1 C 15.1 14 14.4 13.2 14.4 12.2 Z M 9.5 12.2 C 9.5 11.1 10.3 10.3 11.5 10.3 C 12.8 10.3 13.6 11.3 13.6 12.7 C 13.6 14.7 11.9 15.9 10.9 15.9 C 10.6 15.9 10.4 15.7 10.4 15.5 C 10.4 15.3 10.5 15.1 10.8 15.1 C 11.6 14.9 12.3 14.4 12.5 13.7 L 12.3 13.7 C 12.1 14 11.7 14.1 11.2 14.1 C 10.2 14 9.5 13.2 9.5 12.2 Z M 10.4 21.4 L 13.2 18.7 C 13.8 18.1 14.1 18 14.8 18 L 19.4 18 C 20.7 18 21.5 17.2 21.5 15.9 L 21.5 9.4 C 21.5 8 20.7 7.3 19.4 7.3 L 8.5 7.3 C 7.2 7.3 6.4 8 6.4 9.4 L 6.4 15.9 C 6.4 17.2 7.2 18 8.5 18 L 9.5 18 C 10.1 18 10.4 18.3 10.4 18.9 L 10.4 21.4 Z M 9.9 24 C 9 24 8.4 23.4 8.4 22.4 L 8.4 20.4 L 7.9 20.4 C 5.4 20.3 4 19 4 16.5 L 4 9 C 4 6.5 5.5 5 8.1 5 L 19.9 5 C 22.5 5 24 6.4 24 9 L 24 16.6 C 24 19.1 22.5 20.4 19.9 20.4 L 14.8 20.4 L 11.7 23.1 C 11 23.7 10.5 24 9.9 24 Z" /></path>
+                            </svg>
+                        </button>
+                    `;
+                    mediaControlsElement.insertBefore(buttonDiv, mediaControlsElement.childNodes[5]);
+
+
+               
+                let clonedElement2;
+
+                clonedElement2 = document.querySelector('#airplayButton').cloneNode(true);
+                document.querySelector('#airplayButton').replaceWith(clonedElement2);
+
+                document.getElementById("airplayButton").addEventListener('click', function () {
+                    try{AudioOutputs.castUI();
+                    }catch(e){}
+                });
+            
+                
                 /* Lyric View for MV */
                 if (!document.querySelector('#MVLyricsBox')){
-                    const lyricsMV = document.createElement("div");
-                    lyricsMV.id = "MVLyricsBox";
-                    lyricsMV.style.zIndex = 9999999;
-                    lyricsMV.style.backgroundColor= "rgba(0,0,0,0.7)";
-                    lyricsMV.style.display = "none";
-                    lyricsMV.style.color = "yellow";
-                    try{
-                        document.body.appendChild(lyricsMV);}
-                    catch(e){}
-                    lyricsMV.innerHTML = `<div id="mvlyrics"></div><div id="mvlyricstrans"></div>`;
+                const lyricsMV = document.createElement("div");
+                lyricsMV.id = "MVLyricsBox";
+                lyricsMV.style.zIndex = "999999";
+                lyricsMV.style.backgroundColor= "rgba(0,0,0,0.7)";
+                lyricsMV.style.display = "none";
+                lyricsMV.style.color = "yellow";
+                try{
+                document.body.appendChild(lyricsMV);}
+                catch(e){}
+                lyricsMV.innerHTML = `<div id="mvlyrics"></div><div id="mvlyricstrans"></div>`;
+
                 }
 
                 /* Lyrics Button Click Event Handling */
-                const upNextSideBarTogglePath = (preferences.visual.frameType === 'mac' ? '/html/body/div[4]/div/div[3]/div/div[3]/div[3]/button' : '/html/body/div[4]/div[3]/div[3]/div/div[3]/div[3]/button');
-                const upNextSideBarToggle = mediaControlsElement.childNodes[5].getElementsByTagName('button')[0];
+
+                const upNextSideBarToggle = mediaControlsElement.childNodes[6].getElementsByTagName('button')[0];
                 let clonedElement;
                 if (document.querySelector("#lyricsButton") && upNextSideBarToggle) {
 
@@ -141,7 +193,6 @@ try {
                             _lyrics.GetLyrics(1, false);
                         }
                     }
-
                     function closeLyrics() {
                         document.body.classList.remove("web-chrome-drawer-open");
                         document.body.classList.remove("web-chrome-drawer-closing");
@@ -153,6 +204,7 @@ try {
 
                     clonedElement = document.querySelector('#lyricsButton').cloneNode(true);
                     document.querySelector('#lyricsButton').replaceWith(clonedElement);
+
 
                     if (!document.getElementById("lyricer")) {
 
@@ -168,17 +220,22 @@ try {
                                 ipcRenderer.send('NetEaseLyricsHandler', lrcfile);
                             } else {
                                 if (lrcfile!= null && lrcfile.length > 0)
-                                    lrc.setLrc(lrcfile);
 
+                                lrc.setLrc(lrcfile);
+                                
                             }
                         });
-
+    
                         ipcRenderer.on('lyricstranslation', function (event, data) {
                             lrc.setMXMTranslation(data);
                         });
-
+    
                         ipcRenderer.on('backuplyrics', function (_event, _data) {
                             _lyrics.GetLyrics(1, true);
+                        });
+
+                        ipcRenderer.on('backuplyricsMV', function (_event, _data) {
+                            _lyrics.GetLyrics(1, false, false);
                         });
 
                         ipcRenderer.on('ProgressTimeUpdate', function (event, data) {
@@ -197,6 +254,7 @@ try {
 
                         _lyrics.GetLyrics(2, false);
                     }
+
                     document.getElementById("lyricsButton").addEventListener('click', function () {
                         if (document.querySelector('.web-chrome-drawer').querySelector('.web-navigation__up-next.web-chrome-up-next.up-next') == null) {
 
@@ -238,20 +296,19 @@ try {
                                 } else {
                                     if (lrcfile!= null && lrcfile.length > 0)
                                         lrc.setLrc(lrcfile);
-
                                 }
                             });
-
+        
                             ipcRenderer.on('lyricstranslation', function (event, data) {
                                 lrc.setMXMTranslation(data);
                             });
-
+        
                             ipcRenderer.on('backuplyrics', function (_event, _data) {
                                 _lyrics.GetLyrics(1, true);
                             });
 
                             ipcRenderer.on('backuplyricsMV', function (_event, _data) {
-                                _lyrics.GetLyrics(1, false);
+                                _lyrics.GetLyrics(1, false, false);
                             });
 
                             ipcRenderer.on('ProgressTimeUpdate', function (event, data) {
@@ -281,22 +338,22 @@ try {
                         }
                     }, false);
                 }
-            },
+            }},
 
-            GetLyrics: (mode, mxmfail) => {
-                const musicType = encodeURIComponent((MusicKit.getInstance().nowPlayingItem != null) ? MusicKit.getInstance().nowPlayingItem["type"] ?? '' : '');
+            GetLyrics: (mode, mxmfail, yt) => {
+                const youtube = yt ?? true; /* please don't change this to || */
+                const musicType = (MusicKit.getInstance().nowPlayingItem != null) ? MusicKit.getInstance().nowPlayingItem["type"] ?? '' : '';
                 const trackName = encodeURIComponent((MusicKit.getInstance().nowPlayingItem != null) ? MusicKit.getInstance().nowPlayingItem.title ?? '' : '');
                 const artistName = encodeURIComponent((MusicKit.getInstance().nowPlayingItem != null) ? MusicKit.getInstance().nowPlayingItem.artistName ?? '' : '');
-                const duration = encodeURIComponent(Math.round(MusicKitInterop.getAttributes()["durationInMillis"] / 1000));
                 const songID = (MusicKit.getInstance().nowPlayingItem != null) ? MusicKit.getInstance().nowPlayingItem["_songId"] ?? -1 : -1;
-                if(trackName != '' && !(trackName == "No Title Found" && artistName == '')){
-                    /* MusixMatch Lyrics*/
-                    if(musicType === "musicVideo" && preferences.visual.yton){
+                const duration = encodeURIComponent(Math.round(MusicKitInterop.getAttributes()["durationInMillis"] / 1000));
+                if (trackName !== '' && !(trackName === "No Title Found" && artistName === '')) {
+                     /* MusixMatch Lyrics*/
+                    if(musicType === "musicVideo" && preferences.visual.yton && youtube){
                         ipcRenderer.send('YTTranslation', trackName, artistName, preferences.visual.mxmlanguage);
-                    } else if (!mxmfail && preferences.visual.mxmon) {
-                        console.log('duh!');
-                        var time = duration;
-                        ipcRenderer.send('MXMTranslation', trackName, artistName, preferences.visual.mxmlanguage, time);
+                    } else/* MusixMatch Lyrics*/
+                    if (!mxmfail && preferences.visual.mxmon) {
+                        ipcRenderer.send('MXMTranslation', trackName, artistName, preferences.visual.mxmlanguage, duration);
                     }
                     /* Apple Lyrics (from api lyric query) */
                     else if (songID !== -1) {
@@ -312,10 +369,16 @@ try {
                                 try {
                                     const ttmlLyrics = response["ttml"];
                                     let lyrics = "";
+                                    let synced = true;
                                     const parser = new DOMParser();
                                     const doc = parser.parseFromString(ttmlLyrics, "text/xml");
+                                    console.log('sdx',doc.getElementsByTagName('tt')[0].getAttribute("itunes:timing") === "None");
+                                    if (doc.getElementsByTagName('tt')[0].getAttribute("itunes:timing") === "None"){
+                                      synced = false;
+                                    }
                                     const lyricsLines = doc.getElementsByTagName('p');
                                     const endTime = [0];
+                                    if (synced) {
                                     try {
                                         for (let element of lyricsLines) {
                                             rawTime = element.getAttribute('begin').match(/(\d+:)?(\d+:)?(\d+)(\.\d+)?/);
@@ -350,6 +413,19 @@ try {
                                             lrcTime = minutes + seconds + milliseconds;
                                             lyrics = lyrics.concat(`[${lrcTime}]${element.textContent}` + "\r\n");
                                         }
+                                    }}
+                                    else {
+                                        try{
+                                        var body = doc.getElementsByTagName('body')[0].innerHTML;
+                                        if (document.getElementById("lyricer")) {
+                                            var u = document.createElement('div');
+                                            u.id = "unsynced";
+                                            u.innerHTML = body;
+                                            if (!document.getElementById("unsynced")){
+                                            document.getElementById("lyricer").appendChild(u);} else {console.log('duped')}
+                                        }
+                                        } catch(e){}
+                                        
                                     }
                                     let artworkURL = ((MusicKit.getInstance().nowPlayingItem != null) ? MusicKit.getInstance().nowPlayingItem.artworkURL : '').replace("{w}", 256).replace("{h}", 256);
                                     if (artworkURL == null) {
@@ -498,7 +574,7 @@ try {
                 }
 
                 AM.themesListing[theme]["options"].forEach((option) => {
-                    if (typeof userOptions[theme][option.key] == "undefined" || typeof userOptions[theme][option.key] == "null") {
+                    if (typeof userOptions[theme][option.key] == "undefined" || userOptions[theme][option.key] == null) {
                         userOptions[theme][option.key] = parseBool(option.defaultValue);
                     }
                 });
@@ -518,7 +594,6 @@ try {
                 this.refresh();
             },
             getWallpaper() {
-                let self = this;
                 this.wallpaper = ipcRenderer.sendSync("get-wallpaper");
                 this.updateMetrics()
             },
@@ -562,20 +637,19 @@ try {
                         micaElement.style.backgroundSize = "cover";
                         break;
                 }
-                ;
+
             },
             setMica(val = false) {
-                if(val) {
+                if (val) {
                     this.enableMica();
-                }else{
+                } else {
                     this.disableMica();
                 }
             },
             disableMica() {
-                if(!this.micaActive) {
+                if (!this.micaActive) {
                     return;
                 }
-                let self = this;
                 this.micaActive = false;
                 document.querySelector(".micaBackground").remove();
             },
@@ -584,11 +658,6 @@ try {
                 if (this.micaActive) {
                     console.log("Mica is already active");
                     return;
-                }
-                if (this.lastTheme !== "winui") {
-                    if (confirm("This feature currently requires the Eleven theme, enable now?")) {
-                        this.loadTheme("winui");
-                    }
                 }
                 this.micaActive = true;
                 var micaDOM = document.createElement("div");
@@ -607,18 +676,20 @@ try {
                             lastScreenX = window.screenX;
                             cb();
                         }
-                        if(self.micaActive) {
+                        if (self.micaActive) {
                             requestAnimationFrame(detectScreenMove);
                         }
                     }
-                    if(self.micaActive) {
+
+                    if (self.micaActive) {
                         requestAnimationFrame(detectScreenMove);
                     }
                 }
 
                 onScreenMove(function () {
                     micaDOM.style.backgroundPosition = `${window.screenX * -1}px ${window.screenY * -1}px`;
-                    micaDOM.style.backgroundSize = `${screen.width}px ${screen.height}px`;
+                    /**micaDOM.style.backgroundSize = `${screen.width}px ${screen.height}px`;**/
+                    micaDOM.style.backgroundSize = `cover`;
                 });
             },
             loadTheme(path = "", reload = false) {
@@ -682,6 +753,13 @@ try {
                                         --musicKit-artwork: url("${artwork.replace("{w}", 2000).replace("{h}", 2000)}");
                                     }
                                 `);
+                                
+                                if (MusicKit.getInstance().nowPlayingItem.title != "" & !(MusicKit.getInstance().nowPlayingItem.title == "No Title Found" && MusicKit.getInstance().nowPlayingItem.artistName == "")){
+                                    ipcRenderer.send('updateMiniPlayerArt',artwork.replace("{w}", 2000).replace("{h}", 2000));
+                                    ipcRenderer.send('updateMiniPlayerMetaData',MusicKit.getInstance().nowPlayingItem.title,MusicKit.getInstance().nowPlayingItem.artistName,MusicKit.getInstance().nowPlayingItem.albumName);
+                                    ipcRenderer.send('setupNewTrack',MusicKit.getInstance().nowPlayingItem.title,MusicKit.getInstance().nowPlayingItem.artistName,MusicKit.getInstance().nowPlayingItem.albumName,artwork.replace("{w}", 256).replace("{h}", 256));}
+
+                        
                                 this.refresh();
                             }
                         });
@@ -689,7 +767,7 @@ try {
                         console.error(e);
                     }
                 }
-
+                
                 this._styleSheets.Meta.replaceSync(`
                 :root {
                     --musicKit-artwork-64: url("${artwork.replace("{w}", 64).replace("{h}", 64)}");
@@ -698,6 +776,11 @@ try {
                     --musicKit-artwork: url("${artwork.replace("{w}", 2000).replace("{h}", 2000)}");
                 }
             `);
+            if ( (artwork === '' || !artwork) && MusicKit.getInstance().nowPlayingItem.title != "" & !(MusicKit.getInstance().nowPlayingItem.title == "No Title Found" && MusicKit.getInstance().nowPlayingItem.artistName == "")){
+                ipcRenderer.send('updateMiniPlayerArt',artwork.replace("{w}", 2000).replace("{h}", 2000));
+                ipcRenderer.send('updateMiniPlayerMetaData',MusicKit.getInstance().nowPlayingItem.title,MusicKit.getInstance().nowPlayingItem.artistName,MusicKit.getInstance().nowPlayingItem.albumName);
+                ipcRenderer.send('setupNewTrack',MusicKit.getInstance().nowPlayingItem.title,MusicKit.getInstance().nowPlayingItem.artistName,MusicKit.getInstance().nowPlayingItem.albumName,artwork.replace("{w}", 256).replace("{h}", 256));}
+
                 this.refresh();
             },
             setTransparency(val) {
@@ -734,11 +817,16 @@ try {
         };
     }
 
+    /* Notification shit */
+    if (typeof AMNotification == "undefined") {
+        var AMNotification = false;
+    }
+
     /* Bulk AME JavaScript Functions */
     if (typeof AMJavaScript == "undefined") {
         var AMJavaScript = {
             getQuery(q) {
-                return (window.location.search.match(new RegExp('[?&]' + q + '=([^&]+)')) || [, null])[1];
+                return (window.location.search.match(new RegExp('[?&]' + q + '=([^&]+)')) || [undefined, null])[1];
             },
             getRequest: (url, callback = () => {
             }) => {
@@ -748,6 +836,20 @@ try {
                 };
                 xhttp.open("GET", url, true);
                 xhttp.send();
+            },
+            CreateNotification: (notification) => {
+                if (AMNotification) {
+                    AMNotification.close()
+                }
+
+                AMNotification = new Notification(notification.title, {
+                    body: notification.body,
+                    icon: notification.icon
+                });
+
+                AMNotification.addListener('action', (_event) => {
+                    MusicKitInterop.nextTrack();
+                });
             },
             LoadCustomStartup: async () => {
                 const preferences = ipcRenderer.sendSync('getStore');
@@ -763,9 +865,16 @@ try {
                 }
                 /** End Plugins */
 
-                if(preferences.visual.frameType == "") {
+                ipcRenderer.on('notification', (event, notification) => {
+                    AMJavaScript.CreateNotification(notification);
+                });
+
+                /** Expose platform to CSS */
+                document.body.setAttribute("platform", navigator.platform);
+                
+                if (preferences.visual.frameType === "") {
                     document.body.setAttribute("frame-type", "disabled");
-                }else{
+                } else {
                     document.body.setAttribute("frame-type", preferences.visual.frameType);
                 }
 
@@ -774,9 +883,16 @@ try {
                     if (!document.querySelector('.media-artwork-v2__image').classList.contains('media-artwork-v2__image--fallback')) {
                         const artwork = document.querySelector('#ember13');
                         artwork.onclick = function () {
-                            ipcRenderer.send("set-miniplayer", true);
+                            if (preferences.visual.albumartNPPLaylist){
+                                try{
+                                    document.getElementById("ameNPPlaylist").click();
+                                } catch (err) {}
+                            }
+                            else{
+                            ipcRenderer.send("set-miniplayer", true);}
                         };
                         /* Picture-in-picture icon should be overlayed over artwork when mouse over */
+                        
                     }
                 });
 
@@ -792,10 +908,10 @@ try {
                     MusicKit.getInstance().bitrate = 64;
                 }
 
-                /* Seemless (Apple dont know how to spell) Audio Playback */
-                if (preferences.audio.seemlessAudioTransitions) {
-                    console.warn("[Custom] Seemless Audio Transitions enabled.");
-                    MusicKit.getInstance()._bag.features["seemless-audio-transitions"] = true;
+                /* Seamless (Apple dont know how to spell) Audio Playback */
+                if (preferences.audio.seamlessAudioTransitions) {
+                    console.warn("[Custom] Seamless Audio Transitions enabled.");
+                    MusicKit.getInstance()._bag.features["seamless-audio-transitions"] = true;
                 }
 
                 /* Incognito Mode */
@@ -807,7 +923,67 @@ try {
                 MusicKit.getInstance().addEventListener(MusicKit.Events.playbackTimeDidChange, function () {
                     ipcRenderer.send('LyricsTimeUpdate', MusicKit.getInstance().currentPlaybackTime + 0.250);
                 });
-                MusicKit.getInstance().addEventListener(MusicKit.Events.nowPlayingItemDidChange, function () {
+                MusicKit.getInstance().addEventListener(MusicKit.Events.nowPlayingItemDidChange, async function  () {
+                    var EAtmpdisable = false;
+                    var tempOutputID = -1;
+                    var LibraryFolder = document.querySelector('[aria-labelledby="ember10-library"]');
+                    var NowPLPLaylist ;
+                    var href ;
+                    try{
+                        try{
+                      NowPLPLaylist =  MusicKit.getInstance().nowPlayingItem._container.attributes  ; 
+                      
+                      href = (NowPLPLaylist.href.includes("/library/") ? "/library" : "") + "/" + NowPLPLaylist.playParams.kind + "/" + NowPLPLaylist.playParams.id;
+                      if (href.startsWith(`/library/album/`)){
+                        console.log("sdsss");
+                        href = href.replace(`/library/album/`, `/library/albums/`);
+                      } 
+                      } catch(e) {}
+                        
+                        if (!href) {
+                            var songinfo = await MusicKit.getInstance().api.song(MusicKit.getInstance().nowPlayingItem.id); 
+                            href = "/album/" +songinfo.albums[0].id;
+                           } 
+                    } catch (e) {}
+                    var item = 
+                    `<li role="listitem" aria-selected="false" class="typography-title-3-tall web-navigation__nav-list-item ">
+                    <a role="button" href="${ href ??"/library/recently-added"}" id="ameNPPlaylist" class="ember-view web-navigation__list-item-button button-reset web-navigation__list-item-button--playlist" aria-pressed="false" aria-controls="page-container__first-linked-element">
+                        <svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="web-navigation__nav-icon" aria-hidden="true"><path d="M12 20c4.376 0 8-3.631 8-8 0-4.376-3.631-8-8.008-8C7.624 4 4 7.624 4 12c0 4.369 3.631 8 8 8zm0-1.333A6.634 6.634 0 015.341 12a6.628 6.628 0 016.651-6.667A6.653 6.653 0 0118.667 12 6.636 6.636 0 0112 18.667zm-1.467-3.6l4.463-2.636a.483.483 0 000-.839L10.533 8.95c-.337-.204-.784-.047-.784.33v5.458c0 .377.416.55.784.33z" fill-rule="nonzero"></path></svg>
+                        <span class="web-navigation__nav-label">
+                            Current Playlist
+                        </span>
+                    </a>
+            </li>`; 
+                  if (!document.getElementById("ameNPPlaylist")){ 
+                  LibraryFolder.insertAdjacentHTML( 'afterbegin', item);}else { 
+                     document.getElementById("ameNPPlaylist").setAttribute("href", href ?? "/library/recently-added");}
+                        
+                    try{
+                        if (MusicKit.getInstance().nowPlayingItem["type"] === "musicVideo") {
+                            try{
+                            if(!GCOverride ){
+                            MVsource = AMEx.context.createMediaElementSource(document.querySelector('apple-music-video-player').shadowRoot.querySelector('amp-video-player-internal').shadowRoot.querySelector('amp-video-player').shadowRoot.getElementById('apple-music-video-player'));  
+                            MVsource.connect(windowAudioNode); 
+                                                   }
+                                                
+                        } catch(e){console.log(e);}
+                        } else{
+                            if (!GCOverride ) {   
+                            try{
+                                AMEx.result.source.connect(windowAudioNode);}
+                                catch(e){}}
+                        }
+                    }catch(e){}
+                    try{
+                        if (MusicKit.getInstance().nowPlayingItem["type"] === "musicVideo") {
+                            document.querySelector(`#MVLyricsBox`).style.display = 'block';
+                        } else {
+                            document.querySelector(`#MVLyricsBox`).style.display = 'none';
+                        }
+                        document.querySelector(`#MVLyricsBox`).childNodes[0].innerHTML= "";
+                        document.querySelector(`#MVLyricsBox`).childNodes[1].innerHTML= "";
+                    }
+                    catch (e){}
                     try {
                         GetXPath("/html/body/div[4]/div[3]/div[3]/div/div[2]/div[1]/img").src = "https://music.apple.com/assets/product/MissingArtworkMusic.svg";
                     } catch (e) {
@@ -820,7 +996,7 @@ try {
                     }
 
                     const sidebar = document.querySelector('.web-chrome-drawer');
-                    if (sidebar && document.body.classList.contains('web-chrome-drawer-open')) {
+                    if ((sidebar && document.body.classList.contains('web-chrome-drawer-open')) || (MusicKit.getInstance().nowPlayingItem != null && MusicKit.getInstance().nowPlayingItem["type"] == "musicVideo")) {
                         _lyrics.GetLyrics(1, false);
                     }
 
@@ -832,7 +1008,7 @@ try {
                     for (const mutation of mutationList) {
                         for (const child of mutation.addedNodes) {
                             try {
-                                if (document.getElementById("mk-dialog-title").textContent === "cancelled") {
+                                if (document.getElementById("mk-dialog-title").textContent === "cancelled" || document.getElementById("mk-dialog-title").textContent.includes("The play") || document.getElementById("mk-dialog-title").textContent.includes("MEDIA_KEY")) {
                                     document.getElementById("musickit-dialog").remove();
                                     document.getElementById("musickit-dialog-scrim").remove();
                                     break;
@@ -854,9 +1030,9 @@ try {
                     AMStyling.setTransparency(false);
                 }
 
-                if(preferences["visual"]["transparencyEffect"] == "mica") {
+                if (preferences["visual"]["transparencyEffect"] === "mica") {
                     AMStyling.setMica(true);
-                }else{
+                } else {
                     AMStyling.setMica(false);
                 }
 
@@ -868,12 +1044,17 @@ try {
                 }
 
                 /** Need a better way to find the user menu asap, this is embarrassing **/
-                var checkForUserMenu = setInterval(function () {
-                    if (document.querySelectorAll(".web-chrome-controls-container>.web-navigation__auth").length) {
-                        _tests.usermenuinit();
-                        clearInterval(checkForUserMenu);
-                    }
-                }, 100);
+                if(MusicKit.getInstance().authorizationStatus !== 0) {
+                    var checkForUserMenu = setInterval(function () {
+                        if (document.querySelectorAll(".web-chrome-controls-container>.web-navigation__auth").length) {
+                            _tests.usermenuinit();
+                            ipcRenderer.invoke("window-ready");
+                            clearInterval(checkForUserMenu);
+                        }
+                    }, 100);
+                }else{
+                    ipcRenderer.invoke("window-ready");
+                }
 
             },
             LoadCustom: () => {
@@ -893,6 +1074,7 @@ try {
                 const buttonPath = (preferences.visual.frameType === 'mac-right' ? '//*[@id="web-main"]/div[4]/div/div[3]/div[3]/button' : '//*[@id="web-main"]/div[3]/div/div[3]/div[3]/button');
                 if (GetXPath(buttonPath)) {
                     GetXPath(buttonPath).addEventListener('click', function () {
+                        try {
                         if (document.querySelector('.context-menu__option--app-settings')) {
                             if (preferences.advanced.verboseLogging) console.log("[settingsInit] Preventing second button.");
                             return;
@@ -954,7 +1136,7 @@ try {
                             });
                             /** End plugin menu items */
                         }
-                    });
+                    } catch (e) {}});
                 }
 
                 /* Scroll Volume */
@@ -1102,6 +1284,63 @@ try {
                 }
             },
 
+            createNotification: (changed) => {
+                if (typeof changed !== 'object' || !changed || (Object.keys(changed).length === 0 && changed.constructor === Object)) {
+                    return;
+                }
+
+                let changedHTML = ``,
+                    changedFull = ``,
+                    addedHTML = ``,
+                    addedFull = ``;
+
+                for (let [key, value] of Object.entries(changed)) {
+                    key = key.split('.')[0];
+                    key = key.charAt(0).toUpperCase() + key.slice(1);
+
+                    if (value === 'updated') {
+                        changedHTML += `<li style="color: var(--systemYellow);">${key}</li>`;
+                    } else if (value === 'added') {
+                        addedHTML += `<li style="color: var(--systemGreen);">${key}</li>`;
+                    }
+                }
+
+                if (changedHTML !== '') {
+                    changedFull = `
+                        <h2 style="text-align: center; border-bottom: .5px solid var(--labelDivider); padding: 5px; margin-bottom: 12px;">The following themes have been updated:</h2>
+                        <ul style="margin-bottom: 32px">
+                            ${changedHTML}
+                        </ul>
+                    `
+                }
+
+                if (addedHTML !== '') {
+                    addedFull = `
+                        <h2 style="text-align: center; border-bottom: .5px solid var(--labelDivider); padding: 5px; margin-bottom: 12px;">The following themes have been added:</h2>
+                        <ul style="margin-bottom: 32px">
+                            ${addedHTML}
+                        </ul>
+                    `
+                }
+
+                new AMEModal({
+                    content: `
+                        <div style="height: 100%;">
+                        ${changedFull}
+                        ${addedFull}
+                        </div>`,
+                    Style: {
+                        width: "auto",
+                        minWidth: "386px",
+                        maxWidth: "100%",
+                        minHeight: "300px",
+                        maxHeight: "100%",
+                        height: "auto",
+                        padding: "46px",
+                    }
+                });
+            },
+
             themes: {
                 updateThemesListing: (listing) => {
                     let themesListingHTML = `<option disabled>Select one</option>\n<option value='default'>Default</option>`;
@@ -1113,13 +1352,15 @@ try {
                 },
                 updateThemes: () => {
                     document.getElementById('updateThemes').innerText = 'Updating...';
-                    ipcRenderer.send('updateThemes');
-                    setTimeout(async () => {
-                        AM.themesListing = await ipcRenderer.invoke('updateThemesListing');
-                        AMSettings.themes.updateThemesListing(AM.themesListing);
-                        document.querySelector('#updateThemes').innerHTML = (AM.themesListing ? 'Themes Updated' : 'Error');
-                        document.querySelector('#updateThemes').classList.add(AM.themesListing ? 'success' : 'failure');
-                    }, 2000)
+                    ipcRenderer.invoke('updateThemes').then(listing => {
+                        setTimeout(async () => {
+                            AM.themesListing = await ipcRenderer.invoke('updateThemesListing');
+                            AMSettings.themes.updateThemesListing(AM.themesListing);
+                            document.querySelector('#updateThemes').innerHTML = (AM.themesListing ? 'Themes Updated' : 'Error');
+                            document.querySelector('#updateThemes').classList.add(AM.themesListing ? 'success' : 'failure');
+                            AMSettings.createNotification(listing);
+                        }, 2000)
+                    })
                 }
             },
 
@@ -1141,7 +1382,7 @@ try {
             HandleField: (element) => {
                 const field = document.getElementById(element);
                 if (!field) {
-                    console.error('[HandleField] Element Not Found');
+                    console.error('[HandleField] Element Not Found: ' + element);
                     return;
                 }
 
@@ -1217,9 +1458,13 @@ try {
                         if (platform !== "win32" && platform !== "darwin") {
                             document.getElementById('useOperatingSystemAccentToggleLI').remove();
                         }
+                        if(platform !== "win32") {
+                            document.getElementById('checkForUpdatesToggle').remove();
+                        }
                     });
 
                     /* General Settings */
+                    AMSettings.HandleField('checkForUpdates');
                     AMSettings.HandleField('incognitoMode');
                     AMSettings.HandleField('playbackNotifications');
                     AMSettings.HandleField('trayTooltipSongName');
@@ -1239,6 +1484,7 @@ try {
                     AMSettings.HandleField('transparencyTheme');
                     AMSettings.HandleField('transparencyDisableBlur');
                     AMSettings.HandleField('transparencyMaximumRefreshRate');
+                    AMSettings.HandleField('yton');
                     AMSettings.HandleField('mxmon');
                     AMSettings.HandleField('mxmlanguage');
                     AMSettings.HandleField('streamerMode');
@@ -1246,13 +1492,16 @@ try {
                     AMSettings.HandleField('removeAppleLogo');
                     AMSettings.HandleField('removeFooter');
                     AMSettings.HandleField('removeScrollbars');
+                    AMSettings.HandleField('albumartNPPLaylist');
                     AMSettings.HandleField('useOperatingSystemAccent');
                     AMSettings.HandleField('scaling');
 
                     /* Audio Settings */
                     AMSettings.HandleField('audioQuality');
-                    AMSettings.HandleField('seemlessAudioTransitions');
-                    AMSettings.HandleField('volume');
+                    AMSettings.HandleField('seamlessAudioTransitions');
+                    AMSettings.HandleField('castingBitDepth');
+                    AMSettings.HandleField('enableDLNA');
+
 
                     /* Window Settings */
                     AMSettings.HandleField('appStartupBehavior');

@@ -38,9 +38,12 @@ module.exports = {
 
     disconnect: function () {
         if (!app.cfg.get('general.discordRPC') || !app.discord.isConnected) return;
-        console.verbose('[DiscordRPC][disconnect] Disconnecting from discord.')
+
         try {
-            app.discord.destroy().catch((e) => console.error(`[DiscordRPC][disconnect] ${e}`));
+            app.discord.destroy().then(() => {
+                app.discord.isConnected = false;
+                console.verbose('[DiscordRPC][disconnect] Disconnected from discord.')
+            }).catch((e) => console.error(`[DiscordRPC][disconnect] ${e}`));
         } catch (err) {
             console.error(err)
         }
@@ -64,7 +67,7 @@ module.exports = {
             state: `by ${attributes.artistName}`,
             startTimestamp: attributes.startTime,
             endTimestamp: attributes.endTime,
-            largeImageKey: ((app.cfg.get('general.discordRPC') === 'am-title') ? 'apple' : 'logo'),
+            largeImageKey: attributes.artwork.url.replace('{w}', '512').replace('{h}', '512') ?? ((app.cfg.get('general.discordRPC') === 'am-title') ? 'apple' : 'logo'),
             largeImageText: attributes.albumName,
             smallImageKey: (attributes.status ? 'play' : 'pause'),
             smallImageText: (attributes.status ? 'Playing': 'Paused'),
@@ -90,6 +93,9 @@ module.exports = {
         }
         if (!ActivityObject.largeImageText || ActivityObject.largeImageText.length < 2) {
             delete ActivityObject.largeImageText
+        }
+        if (ActivityObject.details.length > 128) {
+            AcitivityObject.details = ActivityObject.details.substring(0, 125) + '...'
         }
 
         // Clear if if needed

@@ -164,7 +164,7 @@ module.exports = {
     SetButtons: () => {
 
         if (process.platform === 'win32') { // Set the Windows Thumbnail Toolbar Buttons
-            if (app.media) {
+            if (app.media.playParams.id !== 'no-id-found') {
                 app.win.setThumbarButtons([
                     {
                         tooltip: 'Previous',
@@ -208,7 +208,7 @@ module.exports = {
                 ]);
             }
         } else if (process.platform === 'darwin') { // Set the macOS Touchbar
-            if (!app.media) return;
+            if (!app.media || app.media.playParams.id === 'no-id-found') return;
 
             const nextTrack = new TouchBarButton({
                 icon: app.ame.utils.icons.nextTrack,
@@ -271,30 +271,18 @@ module.exports = {
 
         console.verbose(`[CreateNotification] Notification Generating | Function Parameters: SongName: ${attributes.name} | Artist: ${attributes.artistName} | Album: ${attributes.albumName}`)
 
-        if (app.ipc.existingNotification) {
-            console.log("[CreateNotification] Existing Notification Found - Removing. ")
-            app.ipc.existingNotification.close()
-            app.ipc.existingNotification = false
-        }
-
         const NOTIFICATION_OBJECT = {
             title: attributes.name,
             body: `${attributes.artistName} - ${attributes.albumName}`,
             silent: true,
-            icon: join(__dirname, '../icons/icon.png'),
+            icon: (attributes.artwork.url.replace('/{w}x{h}bb', '/512x512bb')).replace('/2000x2000bb', '/35x35bb'),
             actions: [{
                 type: 'button',
                 text: 'Skip'
             }]
         }
 
-        app.ipc.existingNotification = new Notification(NOTIFICATION_OBJECT)
-        app.ipc.existingNotification.show()
-
-
-        app.ipc.existingNotification.addListener('action', (_event) => {
-            app.ame.utils.media.nextTrack()
-        });
+        app.win.webContents.send('notification', NOTIFICATION_OBJECT)
     },
 
     CreateBrowserWindow: () => {
@@ -316,6 +304,8 @@ module.exports = {
             frame: (process.platform !== 'win32' && !(app.cfg.get('visual.frameType') === 'mac' || app.cfg.get('visual.frameType') === 'mac-right')),
             title: app.getName(),
             resizable: true,
+            show: false,
+            opacity: 0,
             // Enables DRM
             webPreferences: {
                 plugins: true,
@@ -333,12 +323,12 @@ module.exports = {
         // Fetch the transparency options
         const transparencyOptions = app.ame.utils.fetchTransparencyOptions()
 
-        if (process.platform === 'darwin' && !app.cfg.get('visual.frameType')) { // macOS Frame
+        if (process.platform === 'darwin' && !app.cfg.get('visual.frameType')) { // macOS Frame and transparency
             options.titleBarStyle = 'hidden'
             options.titleBarOverlay = true
             options.frame = true
             options.trafficLightPosition = {x: 20, y: 20}
-            options.transparent = (!!(app.transparency && transparencyOptions))
+            options.transparent = (app.transparency && transparencyOptions)
         }
 
         // Create the Browser Window

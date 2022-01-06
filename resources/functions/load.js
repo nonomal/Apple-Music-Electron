@@ -71,7 +71,7 @@ module.exports = {
         if (!win) return;
 
         app.storefront = app.cfg.get('general.storefront');
-        const urlBase = app.cfg.get('advanced.useBetaSite') ? 'https://beta.music.apple.com' : 'https://music.apple.com' + app.cfg.get('general.storefront'),
+        const urlBase = app.cfg.get('advanced.useBetaSite') ? 'https://beta.music.apple.com' : 'https://music.apple.com/' + app.cfg.get('general.storefront'),
             urlFallback = `https://music.apple.com/`;
 
         ipcMain.once('userAuthorized', (e, args) => {
@@ -133,7 +133,7 @@ module.exports = {
 
         const BackButtonChecks = (url) => {
             if (!app.win.webContents.canGoBack()) return false
-            const backButtonBlacklist = [`*music.apple.com/*/listen-now*`, `*music.apple.com/*/browse*`, `*music.apple.com/*/radio*`, `*music.apple.com/*/search*`, `*music.apple.com/library/recently-added?l=*`, `*music.apple.com/library/albums?l=*`, `*music.apple.com/library/songs?l=*`, `*music.apple.com/library/made-for-you?l=*`, `*music.apple.com/library/recently-added`, `*music.apple.com/library/albums`, `*music.apple.com/library/made-for-you`, `*music.apple.com/library/songs*`, `*music.apple.com/library/artists/*`, `*music.apple.com/library/playlist/*`];
+            const backButtonBlacklist = [`*music.apple.com/*/listen-now*`, `*music.apple.com/*/browse*`, `*music.apple.com/*/radio*`, `*music.apple.com/*/search*`, `*music.apple.com/library/recently-added?l=*`, `*music.apple.com/library/albums?l=*`, `*music.apple.com/library/songs?l=*`, `*music.apple.com/library/made-for-you?l=*`, `*music.apple.com/library/recently-added`, `*music.apple.com/library/albums`, `*music.apple.com/library/made-for-you`, `*music.apple.com/library/songs*`, `*music.apple.com/library/artists/*`, `*music.apple.com/library/playlist/*`, `*music.apple.com/account/*`];
             let blacklistPassed = true
             backButtonBlacklist.forEach((item) => {
                 if (!blacklistPassed) return;
@@ -147,8 +147,10 @@ module.exports = {
         /* Load Back Button */
         if (BackButtonChecks(app.win.webContents.getURL())) {
             app.ame.load.LoadJS('backButton.js')
+            app.win.webContents.executeJavaScript(`document.body.setAttribute('back-button', 1)`)
         } else { /* Removes the button if the check failed. */
             app.win.webContents.executeJavaScript(`if (document.querySelector('#backButtonBar')) { document.getElementById('backButtonBar').remove() };`).catch((e) => console.error(e));
+            app.win.webContents.executeJavaScript(`document.body.removeAttribute('back-button')`)
         }
 
         /* Load the Startup JavaScript Function */
@@ -157,13 +159,17 @@ module.exports = {
 
     LoadOneTimeFiles: function () {
         // Inject the custom stylesheet
-        app.ame.load.LoadCSS('custom-stylesheet.css')
+        app.ame.load.LoadCSS('custom-stylesheet.css')       
         app.ame.load.LoadCSS('ameframework.css')
 
         // Inject Plugin Interaction
         if (app.pluginsEnabled) {
             app.ame.load.LoadJS('pluginSystem.js', false)
         }
+        // Load this first so it doesn't stuck
+        app.ame.load.LoadJS('OpusMediaRecorder.umd.js')
+        app.ame.load.LoadJS('encoderWorker.umd.js')
+        
 
         // Lyrics
         app.ame.load.LoadJS('lyrics.js')
@@ -175,6 +181,11 @@ module.exports = {
 
         // Bulk JavaScript Functions
         app.ame.load.LoadJS('custom.js')
+
+        // Audio Manuipulation Stuff
+
+        app.ame.load.LoadJS('eq.js')
+
 
         // Window Frames
         if (app.cfg.get('visual.frameType') === 'mac') {

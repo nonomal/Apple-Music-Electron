@@ -56,7 +56,8 @@ module.exports = () => {
             lastfmRemoveFeaturingArtists: true,
             lastfmNowPlaying: true,
             analyticsEnabled: true,
-            lastfmScrobbleDelay: 30
+            lastfmScrobbleDelay: 30,
+            checkForUpdates: true
         },
         visual: {
             theme: "default",
@@ -71,13 +72,17 @@ module.exports = () => {
             removeFooter: true,
             removeScrollbars: true,
             useOperatingSystemAccent: false,
+            albumartNPPLaylist: false,
             scaling: 1,
+            yton: false,
             mxmon: false,
             mxmlanguage: "en"
         },
         audio: {
             audioQuality: "auto",
-            seemlessAudioTransitions: false
+            seamlessAudioTransitions: false,
+            castingBitDepth: '16',
+            enableDLNA: false,
         },
         window: {
             appStartupBehavior: "",
@@ -103,10 +108,11 @@ module.exports = () => {
             showIntro = true
         },
 
-        '3.0.0': store => {
+        '<3.0.0': store => {
             migrationFunctions.clearElectronPrefs()
             migrationFunctions.clearCache()
-            migrationFunctions.showDevelopmentMessage()
+        //    migrationFunctions.showDevelopmentMessage()
+
         }
     }
 

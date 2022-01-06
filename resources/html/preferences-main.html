@@ -6,6 +6,14 @@
             </div>
         </div>
         <ul class="settings-list general">
+            <li class="app-prefs-toggle" id="checkForUpdatesToggle">
+                <span class="typography-title-3-tall">Check For Updates</span>
+                <label class="toggle-element list-element">
+                    <input checked id="checkForUpdates" type="checkbox">
+                    <span class="slider"></span>
+                </label>
+                <span class="app-prefs-help typography-title-3-tall">Automatically check for updates on launch. (Windows Only)</span>
+            </li>
             <li class="app-prefs-toggle">
                 <span class="typography-title-3-tall">Incognito Mode</span>
                 <label class="toggle-element list-element">
@@ -232,6 +240,14 @@
                 </label>
                 <span class="app-prefs-help typography-title-3-tall">Less stable, but allows for lyrics translation and
                     better lyrics detection</span>
+            </li>
+            <li class="app-prefs-toggle">
+                <span class="typography-title-3-tall">Enable Youtube Lyrics (MVs only)</span>
+                <label class="toggle-element list-element">
+                    <input checked id="yton" type="checkbox">
+                    <span class="slider"></span>
+                </label>
+                <span class="app-prefs-help typography-title-3-tall">(NOT RECOMMENDED!) Better timings on some Music Video, also better lyrics on Selected Tracks (e.g JP AMVs)</span>
             </li>
             <li class="app-prefs-dropdown">
                 <label class="typography-title-3-tall" for="mxmlanguage">Lyrics translation language</label>
@@ -503,7 +519,7 @@
                     <option value='za'>Zhuang</option>
                     <option value='zu'>Zulu</option>
                 </select>
-                <span class="app-prefs-help typography-title-3-tall">(Only when Musixmatch Lyrics is enabled) Select the
+                <span class="app-prefs-help typography-title-3-tall">(Only when Musixmatch Lyrics / Youtube Lyrics is enabled) Select the
                     targeted language for translated lyrics</span>
             </li>
             <li class="app-prefs-divider header-nav">
@@ -555,6 +571,14 @@
                 <span class="app-prefs-help typography-title-3-tall">Currently, the scrollbar is experimental and
                     incomplete. It is recommended to leave this on.</span>
             </li>
+            <li class="app-prefs-toggle">
+                <span class="typography-title-3-tall">Use Album Art Click to move to Current Playlist</span>
+                <label class="toggle-element list-element">
+                    <input checked id="albumartNPPLaylist" type="checkbox">
+                    <span class="slider"></span>
+                </label>
+                <span class="app-prefs-help typography-title-3-tall">Click album art to go to currently playing Playlist/Album</span>
+            </li>
             <li class="app-prefs-toggle" id="useOperatingSystemAccentToggleLI">
                 <span class="typography-title-3-tall">Use OS Accent as Application Accent</span>
                 <label class="toggle-element list-element">
@@ -567,7 +591,7 @@
             <li class="app-prefs-dropdown">
                 <label class="typography-title-3-tall" for="scaling">Interface Scaling Multiplier</label>
                 <input class="form-dropdown-select list-element" type="number" id="scaling" name="scaling" min="0.1"
-                       max="4"/>
+                       max="4" step="0.05"/>
                 <span class="app-prefs-help typography-title-3-tall">Set the scale that you would like the interface sized at.</span>
             </li>
         </ul>
@@ -593,13 +617,34 @@
                     high CPU Usage.</span>
             </li>
             <li class="app-prefs-toggle">
-                <span class="typography-title-3-tall">Seemless Audio Transitions</span>
+                <span class="typography-title-3-tall">Seamless Audio Transitions</span>
                 <label class="toggle-element list-element">
-                    <input checked id="seemlessAudioTransitions" type="checkbox">
+                    <input checked id="seamlessAudioTransitions" type="checkbox">
                     <span class="slider"></span>
                 </label>
                 <span class="app-prefs-help typography-title-3-tall">Reduces or completely removes the delay between
                     songs providing a smooth audio experience.</span>
+            </li>
+            <li class="app-prefs-dropdown">
+                <label class="typography-title-3-tall" for="castingBitDepth">Chromecast Audio Bit Depth</label>
+                <select class="form-dropdown-select list-element" id="castingBitDepth" name="castingBitDepth">
+                    <option value='16'>16-bit</option>
+                    <option value='24'>24-bit</option>
+                </select>
+                <span class="app-prefs-help typography-title-3-tall">Audio Casting bit-depth, all devices should support 16-bit
+                    audio, however 24-bit preserves quality from original audio (it is sometimes not 
+                    supported by cheap / old Chromecast devices).
+                </span>
+            </li>
+            <li class="app-prefs-toggle">
+                <span class="typography-title-3-tall">Enable DLNA casting</span>
+                <label class="toggle-element list-element">
+                    <input checked id="enableDLNA" type="checkbox">
+                    <span class="slider"></span>
+                </label>
+                <span class="app-prefs-help typography-title-3-tall">DLNA is supported by a wide variety of devices, however a large 
+                    number of them don't support live radio (e.g LG TVs).
+                </span>
             </li>
         </ul>
     </div>
